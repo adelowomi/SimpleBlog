@@ -221,6 +221,7 @@ class AddPost extends Component {
                             className="fa fa-newspaper"
                             onClick={(e) => this.publish(e)}
                           />
+                          Publish
                         </div>
                       )}
                     </div>

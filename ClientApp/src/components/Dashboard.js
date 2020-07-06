@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import AddPost from "./AddPost";
 import Spinner from "../utilities/Spinner";
 import PopularPost from "./PopularPost";
+import UserProfile from "./UserProfile";
 import { Pie, Polar } from "react-chartjs-2";
 
 const sata = {
@@ -333,7 +334,7 @@ class Dashboard extends Component {
         ) : this.state.viewing == "add-new" ? (
           <AddPost />
         ) : this.state.viewing == "user-profile" ? (
-          "User Profile"
+          <UserProfile />
         ) : null}
       </>
     );

@@ -12,10 +12,10 @@ export default class PopularPost extends Component {
                         </a>
                     </div>
                     <a href=" " className="mygreen-text ">
-                        <h6 className="mb-3 mt-3 "><i className="fas fa-music " /><strong> {this.props.post.category.name}</strong></h6>
+                        <h6 className="mb-3 mt-3 "><i className="fas fa-music " /><strong> Music</strong></h6>
                     </a>
                     <a><h4 className="mb-3 font-weight-bold ">{this.props.post.title}</h4></a>
-                    <p>Posted on <a><strong>{this.props.post.dateCreated}</strong></a></p>
+                    <p>Posted on <a><strong>{this.props.post.dateCreated}</strong></a>, 15/07/2016</p>
                     <p>{this.props.post.title}</p>
                     <Link className="btn btn-mygreen" to={`post/${this.props.post.id}`}>Read more</Link>
                 </div>
