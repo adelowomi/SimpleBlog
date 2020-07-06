@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -14,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Validation.AspNetCore;
 using SimpleBlog.DataContext;
@@ -37,6 +40,11 @@ namespace SimpleBlog
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials().Build());
+            });
             //Set up in-memory database for quick development
 
            services.AddDbContext<Context>(
@@ -63,21 +71,21 @@ namespace SimpleBlog
             //});
 
             //Add OpenIddict for Authentication and Authorization
-            services.AddOpenIddict()
-                .AddCore(options =>
-                {
-                    options.UseEntityFrameworkCore()
-                        .UseDbContext<Context>()
-                        .ReplaceDefaultEntities<int>();
-                })
-                .AddServer(options =>
-                {
-                    options.UseMvc();
-                    options.EnableTokenEndpoint("/token");
-                    options.AllowPasswordFlow();
-                    options.AcceptAnonymousClients();
-                })
-                .AddValidation();
+            //services.AddOpenIddict()
+            //    .AddCore(options =>
+            //    {
+            //        options.UseEntityFrameworkCore()
+            //            .UseDbContext<Context>()
+            //            .ReplaceDefaultEntities<int>();
+            //    })
+            //    .AddServer(options =>
+            //    {
+            //        options.UseMvc();
+            //        options.EnableTokenEndpoint("/token");
+            //        options.AllowPasswordFlow();
+            //        options.AcceptAnonymousClients();
+            //    })
+            //    .AddValidation();
 
             //ASP.NET Core Identity should use the same clam names as OpenIdDict
             services.Configure<IdentityOptions>(options =>
@@ -85,11 +93,6 @@ namespace SimpleBlog
                 options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Name;
                 options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
-            });
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
             });
 
             var environment = Configuration.GetSection("ApplicationSettings");
@@ -100,12 +103,32 @@ namespace SimpleBlog
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<ILikeService, LikeService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<ICategoryService,CategoryService>();
+            services.AddScoped<ICategoryService, CategoryService>();
 
             AddIdentityCoreServices(services);
             Globals.Variables = environment;
             Globals.Connectoins = conections;
             Globals.Init();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            ValidIssuer = Globals.JWTIssuer,
+                            ValidAudience = Globals.JWTIssuer,
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.JWTKey))
+                        };
+                    }
+                );
+
+            services.AddMvc();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,6 +151,7 @@ namespace SimpleBlog
 
             app.UseRouting();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

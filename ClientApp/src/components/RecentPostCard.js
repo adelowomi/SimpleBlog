@@ -11,7 +11,7 @@ export default class RecentPostCard extends Component {
         <div className="col-lg-4 mb-4">
           <div className="view overlay z-depth-1">
             <img
-              src="https://via.placeholder.com/489/a8a8a8/808080?text=."
+              src="/img/postcard.jpg"
               className="img-fluid"
               alt="First sample"
             />

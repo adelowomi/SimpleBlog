@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleBlog.Models;
+using SimpleBlog.Utilities;
 
 namespace SimpleBlog.DataContext
 {
@@ -34,6 +35,7 @@ namespace SimpleBlog.DataContext
                     Quote = "This is also a sample bloqQuote to display to users when the first see the post card",
                     UserId = 1,
                     CategoryId = 2,
+                    DateCreated= Utils.FormattedDate(DateTime.Now),
                     Content = "This is a Test Content and it will display as a placeholder for all the pages while in test"
                 });
                 context.Comments.Add(new Comment
@@ -41,7 +43,8 @@ namespace SimpleBlog.DataContext
                     Id = 1,
                     PostId = 1,
                     UserId = 1,
-                    Message = "This is a default comment"
+                    Message = "This is a default comment",
+                    DateCreated= Utils.FormattedDate(DateTime.Now)
                 });
                 context.Comments.Add(new Comment
                 {

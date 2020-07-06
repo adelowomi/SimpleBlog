@@ -27,6 +27,7 @@ namespace SimpleBlog.Models
         public List<Comment> Comments { get; set; }
         [NotMapped]
         public Category Category {get;set;}
+        public string DateCreated {get;set;}
 
     }
 }

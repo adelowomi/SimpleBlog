@@ -69,27 +69,43 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
       <!-- jQuery -->
-  <script type="text/javascript " src="js/jquery.min.js "></script>
+  <script type="text/javascript " src="/js/jquery.min.js "></script>
   <!-- Bootstrap tooltips -->
-  <script type="text/javascript " src="js/popper.min.js "></script>
+  <script type="text/javascript " src="/js/popper.min.js "></script>
   <!-- Bootstrap core JavaScript -->
-  <script type="text/javascript " src="js/bootstrap.min.js "></script>
+  <script type="text/javascript " src="/js/bootstrap.min.js "></script>
   <!-- MDB core JavaScript -->
-  <script type="text/javascript " src="js/mdb.min.js "></script>
+  <script type="text/javascript " src="/js/mdb.min.js "></script>
   <!-- Your custom scripts (optional) -->
   <script type="text/javascript ">
   window.onscroll = function() {myFunction()};
 
-var navbar = document.getElementById("navibar");
+var navbar = document.getElementById("navbar");
 var sticky = navbar.offsetTop;
 
-function myFunction() {
-  if (window.pageYOffset >= sticky) {
-    navbar.classList.add("sticky")
-  } else {
-    navbar.classList.remove("sticky");
-  }
-}
+        var ctxP = document.getElementById("pieChart").getContext('2d');
+            var myPieChart = new Chart(ctxP, {
+            type: 'pie',
+            data: {
+            labels: ["Likes", "Dislikes"],
+            datasets: [{
+                data: [300, 120],
+                backgroundColor: ["#1e90ff", "#8b0606", "#FDB45C", "#949FB1", "#4D5360"],
+                hoverBackgroundColor: ["#4285F4", "#f44842", "#FFC870", "#A8B3C5", "#616774"]
+            }]
+            },
+            options: {
+            responsive: true
+            }
+            });
+
+// function myFunction() {
+//   if (window.pageYOffset >= sticky) {
+//     navbar.classList.add("sticky")
+//   } else {
+//     navbar.classList.remove("sticky");
+//   }
+// }
   </script>
   </body>
 </html>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default class Navbar extends Component {
   componentDidMount() {
-    this.sticky();
+    // this.sticky();
   }
 
   sticky = () => {
@@ -24,8 +24,8 @@ export default class Navbar extends Component {
   };
   render() {
     return (
-      <div id="navibar">
-        <nav className="navbar navbar-expand-lg navbar-dark">
+      <div id="">
+        <nav className="navbar navbar-expand-lg navbar-dark sticky-top">
           <div className="container">
             <a className="navbar-brand active" href="index.html">
               <strong>Home</strong>
@@ -87,7 +87,7 @@ export default class Navbar extends Component {
                     className="dropdown-menu dropdown-menu-right dropdown-default"
                     aria-labelledby="navbarDropdownMenuLink-333"
                   >
-                    <Link className="dropdown-item" to="login">
+                    <Link className="dropdown-item" to="/login">
                       Login
                     </Link>
                     <Link className="dropdown-item" to="register">

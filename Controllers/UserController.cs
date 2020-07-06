@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SimpleBlog.Interfaces;
 using SimpleBlog.Models;
@@ -14,10 +16,12 @@ namespace SimpleBlog.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly UserManager<User> _userManager;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService,UserManager<User> userManager)
         {
             _userService = userService;
+            _userManager = userManager;
         }
 
         [HttpPost("register", Name = nameof(CreateUserAsync))]
@@ -45,6 +49,15 @@ namespace SimpleBlog.Controllers
                     ErrorMessage = "An error occured please try again after some time."
                 });
             }
+        }
+
+        public async Task<User> GetLoggedInUser(){
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            IList<Claim> claim = identity.Claims.ToList();
+            var Email = claim[0].Value; 
+
+            var LoggedInUser = await _userManager.FindByEmailAsync(Email);
+            return LoggedInUser;
         }
     }
 }

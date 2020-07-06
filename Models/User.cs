@@ -20,5 +20,8 @@ namespace SimpleBlog.Models
 
         [NotMapped]
         public string Password { get; set; }
+
+        [NotMapped] 
+        public string Token { get; set; }
     }
 }

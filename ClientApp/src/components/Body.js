@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Banner from "./Banner";
-import PopularPosts from "./PopularPosts";
 import Connect from "../utilities/Connect";
 import Spinner from "../utilities/Spinner";
 import RecentPostCard from './RecentPostCard'
@@ -30,7 +29,9 @@ export default class Body extends Component {
     return (
       <>
         {this.state.loading ? (
-          <Spinner size="big" />
+          <div className="mx-auto text-center mt-5">
+          <Spinner size="big" color="blue" />
+        </div>
         ) : (
           <>
             <Banner />
@@ -50,7 +51,6 @@ export default class Body extends Component {
                 </div>
               </div>
             </section>
-            <PopularPosts />
           </>
         )}
       </>

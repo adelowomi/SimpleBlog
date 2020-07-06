@@ -37,5 +37,10 @@ namespace SimpleBlog.Services
             _context.SaveChanges();
             return true;
         }
+        public bool LikePost(Like NewLike){
+            _context.Likes.Add(NewLike);
+            _context.SaveChanges();
+            return true;
+        }
     }
 }

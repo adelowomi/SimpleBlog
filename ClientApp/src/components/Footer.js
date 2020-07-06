@@ -24,7 +24,7 @@ export default class Footer extends Component {
     <div className="footer-copyright pt-3 text-center " style={{backgroundColor: '#1e90ff'}}>
       <div className="layers">
         <div className="container-fluid ">
-          © 2020 Copyright: <a href="# " style={{fontWeight: 400}}>TestProject.com </a>
+          © 2020 Copyright: <a href="# " style={{fontWeight: 400}}>Foodie.com </a>
         </div>
       </div>
     </div>

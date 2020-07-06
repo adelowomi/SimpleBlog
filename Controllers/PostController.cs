@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SimpleBlog.Interfaces;
 using SimpleBlog.Models;
@@ -21,8 +24,9 @@ namespace SimpleBlog.Controllers
         private readonly IUserService _userService;
         private readonly ICategoryService _categoryService;
         private readonly IWebHostEnvironment _environment;
+        private readonly UserManager<User> _userManager;
 
-        public PostController(IPostService postService, ICommentService commentService, ILikeService likeService, IUserService userService, ICategoryService categoryService, IWebHostEnvironment environment)
+        public PostController(IPostService postService, ICommentService commentService, ILikeService likeService, IUserService userService, ICategoryService categoryService, IWebHostEnvironment environment, UserManager<User> userManager)
         {
             _postService = postService;
             _commentService = commentService;
@@ -30,6 +34,7 @@ namespace SimpleBlog.Controllers
             _userService = userService;
             _categoryService = categoryService;
             _environment = environment;
+            _userManager = userManager;
         }
 
         [HttpPost("postimg", Name = nameof(Upload))]
@@ -40,12 +45,16 @@ namespace SimpleBlog.Controllers
             return Ok(url);
         }
 
+        [Authorize]
         [HttpPost("newpost", Name = nameof(CreatePost))]
         [ProducesResponseType(201)]
         public ActionResult CreatePost(Post NewPost)
         {
+            var LoggedInUser = GetLoggedInUser();
+            NewPost.UserId = LoggedInUser.Id;
             if (NewPost != null)
             {
+                NewPost.DateCreated =  Utils.FormattedDate(DateTime.Now);
                 if (NewPost.Image != null)
                 {
                     var url = new ImageProcessor(_environment).UploadImage(NewPost.Image);
@@ -154,6 +163,75 @@ namespace SimpleBlog.Controllers
                 post.Author = await _userService.GetById(post.UserId);
                 post.Category = _categoryService.GetById(post.CategoryId);
             }
+            return Ok(new ResponseFormat
+            {
+                Success = true,
+                Data = AllPosts
+            });
+        }
+
+        [HttpGet("like/{Id}", Name = nameof(LikePost))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public ActionResult LikePost(int Id)
+        {
+            User LoggedInUser = GetLoggedInUser();
+            if (LoggedInUser == null)
+            {
+                LoggedInUser = new User();
+                LoggedInUser.Id = 0;
+            }
+
+            var PostToLike = _postService.GetById(Id);
+            if (PostToLike != null)
+            {
+                Like NewLike = new Like
+                {
+                    PostId = PostToLike.Id,
+                    UserId = LoggedInUser.Id,
+                };
+                var Liked = _likeService.LikePost(NewLike);
+                if (Liked)
+                {
+                    return Ok(new ResponseFormat
+                    {
+                        Success = true,
+                        Data = { }
+                    });
+                }
+                else
+                {
+                    return Ok(new ResponseFormat
+                    {
+                        Success = false,
+                        ErrorMessage = ""
+                    });
+                }
+            }
+            return Ok();
+        }
+
+        public User GetLoggedInUser()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            IList<Claim> claim = identity.Claims.ToList();
+            if(claim.Count != 0){
+                var Email = claim[0].Value;
+            return _userManager.FindByEmailAsync(Email).Result;
+            }
+            return null;
+        }
+
+
+        [Authorize]
+        [HttpGet("listbyuser", Name = nameof(ListPostsByUser))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult> ListPostsByUser()
+        {
+            var ThisUser = GetLoggedInUser();
+            var AllPosts = _postService.ListByUserId(ThisUser.Id);
             return Ok(new ResponseFormat
             {
                 Success = true,

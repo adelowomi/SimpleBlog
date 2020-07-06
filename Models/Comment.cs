@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SimpleBlog.Utilities;
 
 namespace SimpleBlog.Models
 {
@@ -13,6 +14,6 @@ namespace SimpleBlog.Models
         public string Message { get; set; }
         public string Email {get;set;}
         public string Name {get;set;}
-        public DateTime DateCreated {get;set;}
+        public string DateCreated {get;set;}
     }
 }

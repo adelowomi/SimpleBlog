@@ -6,7 +6,7 @@ import Headers from "./Headers";
 import Navbar from "./Navbar";
 import { Link } from "react-router";
 import CommentForm from "./CommentForm";
-import Comments from './Comments'
+import Comments from "./Comments";
 
 class Post extends Component {
   state = {
@@ -15,6 +15,7 @@ class Post extends Component {
     Post: {},
     Comments: [],
     Author: {},
+    liked: false,
   };
 
   componentDidMount() {
@@ -28,6 +29,18 @@ class Post extends Component {
     });
     this.loadPost();
   }
+  onLikeClick = () => {
+    console.log(this.state.postId);
+    var postid = this.state.postId;
+    this.setState({ liked: !this.state.liked });
+    if(this.state.liked){
+      Connect(`post/like/${postid}`, "get")
+      .then((res) => res.json())
+      .then((res) => console.log(res));
+    }
+
+  };
+
   loadPost = () => {
     const {
       match: { params },
@@ -156,13 +169,22 @@ class Post extends Component {
                       </footer>
                     </blockquote>
                     <div className="categorys">
-                      <div className="mt-4">
-                        <span className="badge pink">Travel</span>
-                        <span className="badge badge-primary mx-1">
-                          Adventure
-                        </span>
-                        <span className="badge grey mr-1">Photography</span>
-                        <span className="badge badge-info">Education</span>
+                      <div className="mt-4 h5 grey-text">
+                        {this.state.liked ? (
+                          <span
+                            className="h1 red-text"
+                            onClick={this.onLikeClick}
+                          >
+                            <i class="fas fa-heart"></i>
+                          </span>
+                        ) : (
+                          <span
+                            className="h1 grey-text"
+                            onClick={this.onLikeClick}
+                          >
+                            <i class="fas fa-heart"></i>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -184,7 +206,7 @@ class Post extends Component {
                   {/*Avatar*/}
                   <div className="col-12 col-md-2 mb-md-0 mb-4">
                     <img
-                      src="https://via.placeholder.com/489/a8a8a8/808080?text=."
+                      src="/img/avatar.png"
                       className="img-fluid rounded-circle z-depth-2"
                     />
                   </div>
@@ -230,8 +252,8 @@ class Post extends Component {
                 </div>
               </div>
             </section>
-            <CommentForm postId={this.state.Post.id}/>
-            <Comments Comments={this.state.Comments}/>
+            <CommentForm postId={this.state.Post.id} />
+            <Comments Comments={this.state.Comments} />
           </div>
         )}
         <Footer />

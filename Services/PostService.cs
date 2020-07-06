@@ -37,7 +37,7 @@ namespace SimpleBlog.Services
         {
             try
             {
-                var ThisPost = _context.Posts.Find(Id);
+                var ThisPost = _context.Posts.SingleOrDefaultAsync(x => x.Id == Id).Result;
                 if (ThisPost != null)
                 {
                     return ThisPost;

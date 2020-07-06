@@ -9,6 +9,7 @@ namespace SimpleBlog.Interfaces
     public interface ILikeService
     {
         public List<Like> ListPostLikesById(int Id);
-        public bool DeleteByPostId(int id);
+        public bool DeleteByPostId(int Id);
+        public bool LikePost(Like NewLike);
     }
 }

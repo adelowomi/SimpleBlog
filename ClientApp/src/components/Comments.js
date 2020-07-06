@@ -15,39 +15,41 @@ class Comments extends Component {
         <div className="comments-list text-center text-md-left mb-5">
           <div className="text-center mb-4">
             <h3 className="font-weight-bold pt-3 mb-5">
-    Comments <span className="badge mygreen">{this.state.Comments.length}</span>
+              Comments{" "}
+              <span className="badge mygreen">
+                {this.state.Comments.length}
+              </span>
             </h3>
           </div>
           {/*First row*/}
-          {this.state.Comments.map((comment, index) => 
+          {this.state.Comments.map((comment, index) => (
             <div className="row mb-4">
-            {/*Image column*/}
-            <div className="col-sm-2 col-12 mb-md-0 mb-3">
-              <img
-                src="https://via.placeholder.com/489/a8a8a8/808080?text=."
-                className="avatar rounded-circle z-depth-1-half"
-              />
-            </div>
-            {/*/.Image column*/}
-            {/*Content column*/}
-            <div className="col-sm-10 col-12">
-              <a>
-                <h4 className="font-weight-bold">{comment.name}</h4>
-              </a>
-              <div className="mt-2">
-                <ul className="list-unstyled">
-                  <li className="comment-date">
-                    <i className="fas fa-clock" />{" "}
-                    {comment.dateCreated}
-                  </li>
-                </ul>
+              {/*Image column*/}
+              <div className="col-sm-2 col-12 mb-md-0 mb-3">
+                <img
+                  src="/img/avatar.png"
+                  className="avatar rounded-circle z-depth-1-half"
+                />
               </div>
-              <p className="grey-text">{comment.message}</p>
+              {/*/.Image column*/}
+              {/*Content column*/}
+              <div className="col-sm-10 col-12">
+                <a>
+                  <h4 className="font-weight-bold">{comment.name}</h4>
+                </a>
+                <div className="mt-2">
+                  <ul className="list-unstyled">
+                    <li className="comment-date">
+                      <i className="fas fa-clock" /> {comment.dateCreated}
+                    </li>
+                  </ul>
+                </div>
+                <p className="grey-text">{comment.message}</p>
+              </div>
+              {/*/.Content column*/}
             </div>
-            {/*/.Content column*/}
-          </div>
-          )}
-          
+          ))}
+
           {/*/.First row*/}
         </div>
       </section>

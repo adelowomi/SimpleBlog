@@ -1,4 +1,6 @@
-﻿using AspNet.Security.OpenIdConnect.Primitives;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using AspNet.Security.OpenIdConnect.Primitives;
 using AspNet.Security.OpenIdConnect.Server;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -7,14 +9,19 @@ using Microsoft.Extensions.Options;
 using SimpleBlog.Models;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
+using SimpleBlog.Utilities;
+using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 using OpenIdConnectExtensions = AspNet.Security.OpenIdConnect.Extensions.OpenIdConnectExtensions;
 
 namespace SimpleBlog.Controllers
 {
-    [Route("/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class TokenController : ControllerBase
     {
@@ -35,124 +42,66 @@ namespace SimpleBlog.Controllers
             _roleManager = roleManager;
         }
 
-        [HttpPost(Name = nameof(TokenExchange))]
+        [HttpPost("login", Name = nameof(TokenExchange))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> TokenExchange(OpenIdConnectRequest request)
+        public async Task<IActionResult> TokenExchange(User user)
         {
-            if (!request.IsPasswordGrantType())
+            var UserToLogin = await _userManager.FindByEmailAsync(user.Email);
+            if (UserToLogin == null) return BadRequest(new ResponseFormat
             {
-                return BadRequest(new OpenIdConnectResponse
+                Error = true,
+                ErrorMessage = "There is no User with this email on our system"
+            });
+
+            var token = GenerateJSONWebToken(UserToLogin);
+            if (token != null)
+            {
+                UserToLogin.Token = token;
+                return Ok(new ResponseFormat
                 {
-                    Error = OpenIdConnectConstants.Errors.UnsupportedGrantType,
-                    ErrorDescription = "The specified grant type is not supported."
+                    Success = true,
+                    Data = UserToLogin
                 });
             }
 
-            var user = await _userManager.FindByNameAsync(request.Username);
-            if (user == null)
+            return BadRequest(new ResponseFormat
             {
-                return BadRequest(new OpenIdConnectResponse
-                {
-                    Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                    ErrorDescription = "The username or password is invalid."
-                });
-            }
+                Error = true,
+                ErrorMessage = "An Error Occured Please try again after some time"
+            });
 
-            // Ensure the user is allowed to sign in
-            if (!await _signInManager.CanSignInAsync(user))
-            {
-                return BadRequest(new OpenIdConnectResponse
-                {
-                    Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                    ErrorDescription = "The specified user is not allowed to sign in."
-                });
-            }
-
-            // Ensure the user is not already locked out
-            if (_userManager.SupportsUserLockout && await _userManager.IsLockedOutAsync(user))
-            {
-                return BadRequest(new OpenIdConnectResponse
-                {
-                    Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                    ErrorDescription = "The username or password is invalid."
-                });
-            }
-
-            // Ensure the password is valid
-            if (!await _userManager.CheckPasswordAsync(user, request.Password))
-            {
-                if (_userManager.SupportsUserLockout)
-                {
-                    await _userManager.AccessFailedAsync(user);
-                }
-
-                return BadRequest(new OpenIdConnectResponse
-                {
-                    Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                    ErrorDescription = "The username or password is invalid."
-                });
-            }
-
-            // Reset the lockout count
-            if (_userManager.SupportsUserLockout)
-            {
-                await _userManager.ResetAccessFailedCountAsync(user);
-            }
-
-            // Look up the user's roles (if any)
-            var roles = new string[0];
-            if (_userManager.SupportsUserRole)
-            {
-                roles = (await _userManager.GetRolesAsync(user)).ToArray();
-            }
-
-            // Create a new authentication ticket w/ the user identity
-            var ticket = await CreateTicketAsync(request, user, roles);
-
-            return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
         }
 
-        private async Task<AuthenticationTicket> CreateTicketAsync(OpenIdConnectRequest request, User user, string[] roles)
+        public string GenerateJSONWebToken(User user)
         {
-            var principal = await _signInManager.CreateUserPrincipalAsync(user);
+            var SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.JWTKey));
+            var Credentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
 
-            AddRolesToPrincipal(principal, roles);
-
-            var ticket = new AuthenticationTicket(principal,
-                new AuthenticationProperties(),
-                OpenIdConnectServerDefaults.AuthenticationScheme);
-
-            ticket.SetScopes(OpenIddictConstants.Scopes.Roles);
-
-            // Explicitly specify which claims should be included in the access token
-            foreach (var claim in ticket.Principal.Claims)
+            var claims = new[]
             {
-                // Never include the security stamp (it's a secret value)
-                if (claim.Type == _identityOptions.Value.ClaimsIdentity.SecurityStampClaimType) continue;
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
 
-                // TODO: If there are any other private/secret claims on the user that should
-                // not be exposed publicly, handle them here!
-                // The token is encoded but not encrypted, so it is effectively plaintext.
-               // var Destinations = AspNet.Security.OpenIdConnect.Extensions.OpenIdConnectExtensions;
-                OpenIdConnectExtensions.SetDestinations(claim, OpenIdConnectConstants.Destinations.AccessToken);
-            }
+            var token = new JwtSecurityToken(
+                    issuer: Globals.JWTIssuer,
+                    audience: Globals.JWTIssuer,
+                    claims,
+                    expires: DateTime.Now.AddMinutes(15),
+                    signingCredentials: Credentials
+                );
 
-            return ticket;
+            var encodedToken = new JwtSecurityTokenHandler().WriteToken(token);
+            return encodedToken;
         }
 
-        private static void AddRolesToPrincipal(ClaimsPrincipal principal, string[] roles)
+        [Authorize]
+        [HttpGet]
+        public string Get()
         {
-            var identity = principal.Identity as ClaimsIdentity;
-
-            var alreadyHasRolesClaim = identity.Claims.Any(c => c.Type == "role");
-            if (!alreadyHasRolesClaim && roles.Any())
-            {
-                identity.AddClaims(roles.Select(r => new Claim("role", r)));
-            }
-
-            var newPrincipal = new System.Security.Claims.ClaimsPrincipal(identity);
+            return "Authorised";
         }
-
     }
 }

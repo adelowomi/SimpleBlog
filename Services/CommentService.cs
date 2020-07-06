@@ -22,7 +22,7 @@ namespace SimpleBlog.Services
             try
             {
                 _context.Comments.Add(NewComment);
-                //_context.Comments.SaveChanges();
+                _context.SaveChanges();
                 return NewComment.Id;
             }
             catch (Exception e)

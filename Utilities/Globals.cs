@@ -12,10 +12,14 @@ namespace SimpleBlog.Utilities
         public static IConfiguration Variables;
 
         public static string ConnectionString;
+        public static string JWTKey;
+        public static string JWTIssuer;
 
         public static void Init()
         {
             ConnectionString = Connectoins["StudiomartConnection"];
+            JWTIssuer = Variables["JWTIssuer"];
+            JWTKey = Variables["JWTKey"];
         }
     }
 }
