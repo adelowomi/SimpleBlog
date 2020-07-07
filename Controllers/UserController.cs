@@ -51,13 +51,15 @@ namespace SimpleBlog.Controllers
             }
         }
 
-        public async Task<User> GetLoggedInUser(){
+        public User GetLoggedInUser()
+        {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             IList<Claim> claim = identity.Claims.ToList();
-            var Email = claim[0].Value; 
-
-            var LoggedInUser = await _userManager.FindByEmailAsync(Email);
-            return LoggedInUser;
+            if(claim.Count != 0){
+                var Email = claim[0].Value;
+            return _userManager.FindByEmailAsync(Email).Result;
+            }
+            return null;
         }
     }
 }

@@ -53,8 +53,15 @@ namespace SimpleBlog.Controllers
                 commentCount += thisPostCommentCount;
                 likeCount  += thisPostLikeCount;
             }
-            likePercent[0] = (postCount / likeCount) * 100;
-            likePercent[1] =  likePercent[0] - 100;
+
+            if(likeCount != 0){
+                likePercent[0] = (postCount / likeCount) * 100;
+                likePercent[1] =  likePercent[0] - 100;
+            }else{
+                likePercent[0] = 0;
+                likePercent[1] =  0;
+            }
+          
             
             var Result = new {
                 postCount = postCount,

@@ -221,7 +221,7 @@ class Dashboard extends Component {
                         <div className="small-cards blue lighten-5">
                           <h2>Posts</h2>
                           <h1>
-                            {!this.state.Stats.postCount == 0 ? (
+                            {!this.state.Stats.loading ? (
                               this.state.Stats.postCount
                             ) : (
                               <Spinner sixe="small" color="yellow" />
@@ -235,7 +235,7 @@ class Dashboard extends Component {
                         <div className="small-cards indigo lighten-5">
                           <h2>Likes</h2>
                           <h1>
-                            {!this.state.Stats.likeCount == 0 ? (
+                            {!this.state.Stats.loading ? (
                               this.state.Stats.likeCount
                             ) : (
                               <Spinner sixe="small" color="yellow" />
@@ -248,7 +248,7 @@ class Dashboard extends Component {
                         <div className="small-cards deep-purple lighten-5">
                           <h2>Comments</h2>
                           <h1>
-                            {!this.state.Stats.commentCount == 0 ? (
+                            {!this.state.Stats.loading ? (
                               this.state.Stats.commentCount
                             ) : (
                               <Spinner sixe="small" color="yellow" />
@@ -322,9 +322,16 @@ class Dashboard extends Component {
                   <div className="title-menu mt-5 pt-5"></div>
                   <div className="mt-5 mb-5">
                     <div className="row">
-                      {this.state.Posts.map((post, index) => (
-                        <PopularPost post={post} key={index} />
-                      ))}
+                      {this.state.Posts.length != 0 ? (
+                        this.state.Posts.map((post, index) => (
+                          <PopularPost post={post} key={index} />
+                        ))
+                      ) : (
+                        <div className="mx-auto">
+                          You Have not made any Post yet, When you do Your Posts
+                          will show up here{" "}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

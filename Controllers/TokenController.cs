@@ -54,6 +54,14 @@ namespace SimpleBlog.Controllers
                 ErrorMessage = "There is no User with this email on our system"
             });
 
+            var canSignIn = await _signInManager.CheckPasswordSignInAsync(UserToLogin, user.Password, false);
+
+            if (!canSignIn.Succeeded) return BadRequest(new ResponseFormat
+            {
+                Error = true,
+                ErrorMessage = "Password Incorrect"
+            });
+
             var token = GenerateJSONWebToken(UserToLogin);
             if (token != null)
             {
